@@ -152,6 +152,335 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-MOZac-BUUCTF-WP" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/08/07/MOZac-BUUCTF-WP/">[MOZac]BUUCTF-WP</a>
+    </h1>
+  
+
+        
+        <a href="/2020/08/07/MOZac-BUUCTF-WP/" class="archive-article-date">
+  	<time datetime="2020-08-07T12:09:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-08-07</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="WEB"><a href="#WEB" class="headerlink" title="WEB"></a>WEB</h2><h3 id="护网杯-2018-easy-tornado"><a href="#护网杯-2018-easy-tornado" class="headerlink" title="[护网杯 2018]easy_tornado"></a>[护网杯 2018]easy_tornado</h3><p>打开环境</p>
+<p><img src="https://img-blog.csdnimg.cn/20200315182631262.png" alt="在这里插入图片描述"></p>
+<p>三个文件，点进去看看</p>
+<p><img src="https://img-blog.csdnimg.cn/20200315182711730.png" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20200315182727585.png" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20200315182743203.png" alt="在这里插入图片描述"></p>
+<p>根据提示可以判断是通过读取<code>/fllllllllllllag</code>目录获取flag，同时这个url构成也可以看出一些东西：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//e465ff83-a405-4b2d-8536-b9afb9db504e.node3.buuoj.cn/file?filename=/flag.txt&amp;filehash=47771613f18dfe723c26c5a27b1fc4c6</span></span><br></pre></td></tr></table></figure>
+<p>即是说通过传递filename关键字来读取文件目录，通过剩下的两个文件的提示可以得到payload为</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">文件名&amp;（cookie_secret+文件名md5值）的md5值</span><br></pre></td></tr></table></figure>
+<p>所以关键是怎么获取这个secret值，于是开始尝试<br>尝试直接访问/fllllllllllllag目录，得到如下结果</p>
+<p><img src="https://img-blog.csdnimg.cn/20200315183550195.png" alt="在这里插入图片描述"></p>
+<p>看到了<code>error？msg=Error</code>，基本可以怀疑存在漏洞，更大可能性是ssti，于是尝试</p>
+<p><img src="https://img-blog.csdnimg.cn/20200315183754373.png" alt="在这里插入图片描述"></p>
+<p>可以确定ssti，于是尝试构造payload</p>
+<p>去官网看技术文档吧。。。<a href="https://www.tornadoweb.org/en/stable/guide/templates.html" target="_blank" rel="noopener">TORNADO官网</a><br>终点推荐去看一下Request handlers这个部分，然后是查有关<code>cookie_secret</code>的部分，可以去看一下<a href="https://www.cnblogs.com/liyqiang/p/7140530.html" target="_blank" rel="noopener">TianTianLi大佬的博客</a></p>
+<p><img src="https://img-blog.csdnimg.cn/20200315185207560.png" alt="不会的东西就去学"></p>
+<p>构造payload：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//e465ff83-a405-4b2d-8536-b9afb9db504e.node3.buuoj.cn/error?msg=&#123;&#123;handler.settings&#125;&#125;</span></span><br></pre></td></tr></table></figure>
+<p>成功获取<code>cookie_secret</code>值<br><img src="https://img-blog.csdnimg.cn/20200315185714302.png" alt="在这里插入图片描述">接下来就是构造正确的请求了：（这一步我推荐手算，点名批评py3.x）<br><img src="https://img-blog.csdnimg.cn/20200315190818772.png" alt="在这里插入图片描述">done</p>
+<h3 id="HCTF-2018-WarmUp"><a href="#HCTF-2018-WarmUp" class="headerlink" title="[HCTF 2018]WarmUp"></a>[HCTF 2018]WarmUp</h3><p>打开题目<br><img src="https://img-blog.csdnimg.cn/20200313193558126.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01aRVBTYW4=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">这不是啥都没有吗…..（ctrl+u）<br><img src="https://img-blog.csdnimg.cn/20200313193657862.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01aRVBTYW4=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">去看source.php<br><img src="https://img-blog.csdnimg.cn/20200313193738688.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01aRVBTYW4=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">尝试连接到hint.php<br><img src="https://img-blog.csdnimg.cn/20200313193825879.png" alt="在这里插入图片描述"></p>
+<p>直接上payload：</p>
+<p><img src="https://img-blog.csdnimg.cn/20200313193948238.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01aRVBTYW4=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">OK，我的锅，用一下文件包含漏洞看一下</p>
+<p>payload：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">index.php?file=hint.php%<span class="number">253</span>f/../../../../ffffllllaaaagggg</span><br></pre></td></tr></table></figure>
+<p>成功</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2020/08/07/MOZac-BUUCTF-WP/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-My-Note" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/08/07/My-Note/">My Note</a>
+    </h1>
+  
+
+        
+        <a href="/2020/08/07/My-Note/" class="archive-article-date">
+  	<time datetime="2020-08-07T12:00:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-08-07</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="笔记"><a href="#笔记" class="headerlink" title="笔记"></a>笔记</h1><p>1.信息收集 </p>
+<p>2.登陆后台—–&gt;getshell </p>
+<p>3.Getshell失败—–&gt;转换思路——&gt;挖掘其它漏洞(sql注入等)——&gt;列库收集用户信息 </p>
+<p>4.拿到用户密码——&gt;撞邮箱——–&gt;邮箱拿到关键信息———–&gt;拿到vpn </p>
+<p>5.通过vpn去访问文件服务器——-&gt;写脚本getshell </p>
+<h1 id="CTF学习"><a href="#CTF学习" class="headerlink" title="CTF学习"></a>CTF学习</h1><p>1.xss打后台—–&gt;403———-&gt;ajax抓取页面回转出来———&gt;sql注入—&gt;getting </p>
+<p>2.Bypass Waf来注入 (%00,||,seselectlect 等等 )，国内web常见题型 </p>
+<p>3.代码审计 花式杂耍php的各种特性（反序列化、弱类型） </p>
+<p>4.文件上传 花式Bypass上传（.php111  .inc  .phpt） </p>
+<p>5.各种当前热点漏洞 </p>
+<p>扫描路径—-&gt; phpinfo() ——&gt;  php7 ——-php7 opcache —-&gt;查看文档 —–&gt;  花式绕坑  ——&gt;  Getshell </p>
+<p>6.社会工程学（常用密码） </p>
+<p>7.各种Web漏洞夹杂 </p>
+<p>8.具有内网环境真实渗透场景 </p>
+<h1 id="记大佬的渗透测试记录"><a href="#记大佬的渗透测试记录" class="headerlink" title="记大佬的渗透测试记录"></a>记大佬的渗透测试记录</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">1.对目标进行信息采集 </span><br><span class="line">2.主站拿不下来，决定拿二级域名 </span><br><span class="line">3.排查二级域名 </span><br><span class="line">4.根据二级域名的名字选择upload edit等等具有操作功能的站点入手 </span><br><span class="line">5.存在svn漏洞的话，尝试通过wc、db的形式，利用sqlite将源码还原出来 </span><br><span class="line">6.审计源代码，快速定位代码，全文搜索exec、upload，include等等这些危险操作 </span><br><span class="line">7.到一个exec命令执行，发现管理员权限 </span><br><span class="line">8.回溯代码，定位管理员登录功能，审计出cookie算法可以破解 </span><br><span class="line">9.伪造cookie反弹shell，上去后发现很多站点在上面，权限不够 </span><br><span class="line">10.查看版本 </span><br><span class="line">11.利用之前ctf中的一个一句话提权成功，然后大杀四方。 </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">1.常规的进行信息搜集踩点工作 </span><br><span class="line">2.猜解用户名密码（组合了网站的域名和电话号） </span><br><span class="line">3.登录后台，测试文件上传功能，上传文件中只要含有&lt;?php&gt;就进行上传 </span><br><span class="line">4.脑洞一开，&lt;script language &#x3D;  &quot;php&#39;&gt; 成功getshell</span><br></pre></td></tr></table></figure>
+<h1 id="web狗如何在CTF-web中的套路中实现反套路"><a href="#web狗如何在CTF-web中的套路中实现反套路" class="headerlink" title="web狗如何在CTF-web中的套路中实现反套路"></a>web狗如何在CTF-web中的套路中实现反套路</h1><blockquote>
+<p>讲师：三十、伪赛棍 </p>
+</blockquote>
+<h2 id="题目类型"><a href="#题目类型" class="headerlink" title="题目类型"></a>题目类型</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1.SQL注入 </span><br><span class="line">2.XSS </span><br><span class="line">3.代码审计 </span><br><span class="line">4.文件上传 </span><br><span class="line">5.php特性 </span><br><span class="line">6.后台登陆类 </span><br><span class="line">7.加密解密 </span><br><span class="line">8.其他脑洞、猜谜、和其它结合</span><br></pre></td></tr></table></figure>
+<p>SQL注入 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">1.简单注入 </span><br><span class="line">	‘、and 1&#x3D;1、or 1&#x3D;1、xor 1&#x3D;1 </span><br><span class="line">2.宽字节注入 </span><br><span class="line">	GBK字符集编码，过滤绕过 </span><br><span class="line">3.花式绕mysql </span><br><span class="line">	intervalue(),数字注入 </span><br><span class="line">4.绕关键词检测拦截 </span><br><span class="line">	重复性(selselectect) </span><br><span class="line">5.MongoDB注入 </span><br><span class="line">	nosql注入（nosqlmap） </span><br><span class="line">6.http头部注入 </span><br><span class="line">	x-for-ward注入、IP地址注入、refer注入 </span><br><span class="line">7.二次注入 </span><br><span class="line">	插入注入，另一个页面注入</span><br></pre></td></tr></table></figure>
+<h4 id="SQL注入工具"><a href="#SQL注入工具" class="headerlink" title="SQL注入工具"></a>SQL注入工具</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.burpsuit </span><br><span class="line">2.Hackbar </span><br><span class="line">3.Sqlmap </span><br><span class="line">4.Nosqlmap</span><br></pre></td></tr></table></figure>
+<h4 id="SQL解题思路"><a href="#SQL解题思路" class="headerlink" title="SQL解题思路"></a>SQL解题思路</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">简单：用sqlmap跑 </span><br><span class="line">判断注入点，是否是Http头注入？是否在图片出注入？等 </span><br><span class="line">判断注入类型 </span><br><span class="line">利用报错信息注入 </span><br><span class="line">尝试各种绕过过滤方法 </span><br><span class="line">查找是否是通过的某模块存在的注入漏洞 </span><br><span class="line">延时注入（对待盲注）</span><br></pre></td></tr></table></figure>
+<h4 id="SQL注入技巧"><a href="#SQL注入技巧" class="headerlink" title="SQL注入技巧"></a>SQL注入技巧</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">sql-mod&#x3D;&quot;STRICT_TRANS_TABLES&quot;(默认未开启) </span><br><span class="line">	插入数据截断，插入“admin                                                     X”绕过或越权访问 </span><br><span class="line">注意二次注入 </span><br><span class="line">	isg2015 web350 username从session中直接带入查询，利用数据库字段长度 </span><br><span class="line">	截断，\被gpc后为\\,但是被截断了只剩下一个\，引发注入。 </span><br><span class="line">如果猜解不出数据库的字段，搜索后台，查看源代码，源代码登录时的表单中的字 </span><br><span class="line">段一班和1数据库的字段名相同 </span><br><span class="line">绕过安全狗 </span><br><span class="line">	se%lect </span><br><span class="line"> 针对asp+access，首先来挖掘一下数据库的特性。 </span><br><span class="line">	1.代替空格：%09、%0A、%0C、#0D </span><br><span class="line">	2.可以截断后面语句注释符：%00,%16,%22,%27 </span><br><span class="line">	3.当%09、%0A、%0A、%0C、%0D超过一定长度后，安全狗防御失效。 </span><br><span class="line">	4.UserAgent:BaiduSpider </span><br><span class="line">magic_quotes_gpc&#x3D;On的情况下，提交的参数中如果带有引号’，就会被自动转 </span><br><span class="line">义为\&#39;,使很多注入攻击无效 </span><br><span class="line">1 </span><br><span class="line">2 </span><br><span class="line">3 </span><br><span class="line">4 </span><br><span class="line">5 </span><br><span class="line">6 </span><br><span class="line">7 </span><br><span class="line">8 </span><br><span class="line">9 </span><br><span class="line">10 </span><br><span class="line">11 </span><br><span class="line">12 </span><br><span class="line">13 </span><br><span class="line">14 </span><br><span class="line">15 </span><br><span class="line">16 </span><br><span class="line">17 </span><br><span class="line">18 </span><br><span class="line">19 </span><br><span class="line">20</span><br></pre></td></tr></table></figure>
+<h3 id="XSS"><a href="#XSS" class="headerlink" title="XSS"></a>XSS</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">简单：存储型XSS盲打管理员后台 </span><br><span class="line">各种浏览器auditor绕过 </span><br><span class="line">富文本过滤黑白名单绕过 </span><br><span class="line">CSP绕过 </span><br><span class="line">Flash xss </span><br><span class="line">AngularJS客户端模板XSS </span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
+<h4 id="XSS注入工具"><a href="#XSS注入工具" class="headerlink" title="XSS注入工具"></a>XSS注入工具</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Burpsuit </span><br><span class="line">HackBar </span><br><span class="line">Xss平台 </span><br><span class="line">swf decomplier </span><br><span class="line">flasm </span><br><span class="line">doswf(swf加密) </span><br><span class="line">Crypt Flow (swf加密) </span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+<h4 id="XSS解题思路"><a href="#XSS解题思路" class="headerlink" title="XSS解题思路"></a>XSS解题思路</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">简单XSS，直接利用XSS平台盲打管理员cookie </span><br><span class="line">过滤标签，尝试各种绕过方法 </span><br><span class="line">存在安全策略csp等，尝试相应的绕过方法 </span><br><span class="line">逆向.swf文件，审计源码，构造XSS payload </span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+<h3 id="文件上传"><a href="#文件上传" class="headerlink" title="文件上传"></a>文件上传</h3><p>类型： </p>
+<ul>
+<li>00截断上传 </li>
+<li>multipart/form-data大写绕过 </li>
+<li>花式文件后缀（.php345  .inc  .phtml .phps） </li>
+<li>各种文件内容检测 </li>
+<li>各种解析漏洞 ngix-fastcgi </li>
+<li>花式打狗棒法 </li>
+<li>在线编辑器漏洞等 fckeditor </li>
+<li>fckeditor 2.0&lt;2.2  允许上传asa,cer,php2,php4,inc.pwml,pht后缀的文件上传后它保存的文件直接使用$sFilePath =  $sServerDir ,$Filename,而没有使用$sExtension为后缀，直接导致在win下上传文件后面加个 . 来突破 </li>
+<li>文件包含 <h4 id="文件上传工具"><a href="#文件上传工具" class="headerlink" title="文件上传工具"></a>文件上传工具</h4></li>
+</ul>
+<ul>
+<li>hackbar </li>
+<li>Burpsuit </li>
+<li>Webshell </li>
+<li>中国菜刀 </li>
+<li>AantSword <h4 id="文件上传解题思路"><a href="#文件上传解题思路" class="headerlink" title="文件上传解题思路"></a>文件上传解题思路</h4></li>
+</ul>
+<ul>
+<li>简单文件上传，查看响应 </li>
+<li>是否只是前端过滤后缀名，文件格式，抓包绕过 </li>
+<li>是否存在截断上传漏洞 </li>
+<li>是否对文件头检测（图片马等） </li>
+<li>是否对内容进行检测，尝试绕过方法 </li>
+<li>是否上传马被查杀，免杀 </li>
+<li>是否存在各种解析漏洞 </li>
+<li>http头以两个CRLF（相当于\r\n\r\n）作为结尾，\r\n没有被过滤时，可以利用\r\n作为url参数截断http头，后面跟上注入代码 </li>
+<li>… <strong>练习题：HTCTF-2016 题目14</strong> <h4 id="php特性"><a href="#php特性" class="headerlink" title="php特性"></a>php特性</h4></li>
+</ul>
+<ul>
+<li>弱类型 </li>
+<li>intval </li>
+<li>strpos和== </li>
+<li>反序列化+destruct </li>
+<li>\0截断 </li>
+<li>iconv截断 （%00截断） </li>
+<li>parse_str函数 </li>
+<li>伪协议(io流操作) <h4 id="PHP特性-工具"><a href="#PHP特性-工具" class="headerlink" title="PHP特性-工具"></a>PHP特性-工具</h4></li>
+</ul>
+<ul>
+<li>hackbar </li>
+<li>burpsuit </li>
+<li><a href="http://www.shucunwang.com/RunCode/php" target="_blank" rel="noopener">在线调试环境</a><h4 id="php特性-解题思路"><a href="#php特性-解题思路" class="headerlink" title="php特性-解题思路"></a>php特性-解题思路</h4></li>
+</ul>
+<ul>
+<li>判断是否存在php种截断特性 </li>
+<li>查看源码，判断是否存在php弱类型问题 </li>
+<li>查看源码，注意一些特殊函数 eval()，system()，intval() </li>
+<li>构造变量，获取flag </li>
+<li>是否存在Http （请求参数污染,加两个参数的不同情况。） </li>
+<li>魔法哈希(magic hash) mad5(‘240610708’) = md5(‘QBKCDZO’) = 0e830400451993494058024219903391 </li>
+<li>… <h4 id="php特性-伪协议"><a href="#php特性-伪协议" class="headerlink" title="php特性-伪协议"></a>php特性-伪协议</h4></li>
+</ul>
+<ul>
+<li>php://filter –对本地磁盘文件进行读写 <a href="http://localhost/test/index.php?file=php://filter/read=convert.base64-encode/resource=index.php" target="_blank" rel="noopener">http://localhost/test/index.php?file=php://filter/read=convert.base64-encode/resource=index.php</a></li>
+</ul>
+<p>php://input 伪协议    php://input   需要服务器支持，同时要求 “allow_url_include ”属性设置为 on </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#96;&#96;&#96; </span><br><span class="line">&lt;?php </span><br><span class="line">	@eval(file_get_contents(&#39;php:&#x2F;&#x2F;input&#39;)) </span><br><span class="line">?&gt; </span><br><span class="line">post&lt;?php system(&#39;ifconfig&#39;);?&gt; </span><br><span class="line">&#96;&#96;&#96;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li></li>
+<li>php://memory 总是吧数据存储在内存中 </li>
+<li>php://temp会在内存量达到预定义的限制后（默认2M）存入临时文件 </li>
+<li>… </li>
+</ul>
+<p>1.DATA伪协议，分号和逗号有争议 </p>
+<ul>
+<li>data:文本数据 </li>
+<li>data:text/plain，文本数据 </li>
+<li>data:text/html，HTML代码 </li>
+<li>data:text/css；base64，css代码 </li>
+<li>data:text/javascript;base64,javascript 代码 </li>
+<li>data:image/x-icon;base64,base64编码的icon图片数据 </li>
+<li>data:image/gif;base64,base64编码的gif图片 </li>
+<li>data:image/png;base64,base64编码的png图片 </li>
+<li>data:image/jpeg;base64,base64编码的jpeg图片 </li>
+</ul>
+<p>glob://查找匹配文件路径模式 </p>
+<h3 id="后台登录类"><a href="#后台登录类" class="headerlink" title="后台登录类"></a>后台登录类</h3><ul>
+<li>万能密码绕过 </li>
+<li>变形万能密码绕过 </li>
+<li>社工的方式得到后台密码 </li>
+<li>爆破方式得到后台密码 </li>
+<li>各种cms后台登陆绕过 <h4 id="后台登录类-工具"><a href="#后台登录类-工具" class="headerlink" title="后台登录类-工具"></a>后台登录类-工具</h4></li>
+</ul>
+<ul>
+<li>burpsuit </li>
+<li>hackbar </li>
+<li>sqlmap </li>
+<li>社工库 </li>
+<li>… <h4 id="后台登录类解题思路"><a href="#后台登录类解题思路" class="headerlink" title="后台登录类解题思路"></a>后台登录类解题思路</h4></li>
+</ul>
+<ul>
+<li>根据提示，判断是否是普通的登录绕过，或是利用社工的方式 </li>
+<li>普通登录绕过尝试各种万能密码绕过，或通过sql注入漏洞得到账号密码，或xss盲打 </li>
+<li>若果是cms系统登陆，查找是否有相应版本的后台绕过漏洞 </li>
+<li>社工方式（谷歌、百度、社工库） </li>
+<li>爆破获取 </li>
+<li>… <h3 id="加密解密类-考察知识点"><a href="#加密解密类-考察知识点" class="headerlink" title="加密解密类-考察知识点"></a>加密解密类-考察知识点</h3></li>
+</ul>
+<ul>
+<li>简单编码（多次basecode编码） </li>
+<li>密码题（hash长度扩展、异或、移位加密、各种变形） </li>
+<li>js加解密 </li>
+<li>根据加密源码写解密源码 </li>
+<li>… <h4 id="加解密类-工具"><a href="#加解密类-工具" class="headerlink" title="加解密类-工具"></a>加解密类-工具</h4></li>
+</ul>
+<ul>
+<li>各种编码转换工具 </li>
+<li>Burpsuit </li>
+<li>浏览器控制台 </li>
+<li>… <h4 id="加解密类-解题思路"><a href="#加解密类-解题思路" class="headerlink" title="加解密类-解题思路"></a>加解密类-解题思路</h4></li>
+</ul>
+<ul>
+<li>判断是编码还是加密 </li>
+<li>如果是编码，判断编码类型，尝试解码或者多次编码 </li>
+<li>如果是加密，判断是现有的加密算法，还是字写得加密算法 </li>
+<li>是否是对称加密，是否存在密钥泄露等，获取密钥解密 </li>
+<li>根据加密算法，推断出解密算法 </li>
+<li>… <h3 id="其它类型"><a href="#其它类型" class="headerlink" title="其它类型"></a>其它类型</h3></li>
+</ul>
+<p>社工、花式查社工库、微博、QQ签名、whois、谷歌 </p>
+<p>例题：ISG CTF 2014 Web4 火眼金睛 </p>
+<ul>
+<li>google查找googole天涯社会工库，即可查找。 <a href="http://www.findmima.com" target="_blank" rel="noopener">http://www.findmima.com</a></li>
+</ul>
+<p>SSRF，包括花式探测端口，302跳转、花式协议利用、gophar直接取shell等等 </p>
+<p>例题：XDCTF2015 Web1 300 </p>
+<ul>
+<li>本题为SSRF，进去是一个框框。利用SSRF漏洞，直接尝试 <a href="file://index.php,然后就吧index.php的源码读到">file://index.php,然后就吧index.php的源码读到</a>，之后进行代码审计。 </li>
+</ul>
+<p>协议，花式IP伪造 X-Forwarded-For/X-Client-IP/X-Real/CDN-Src-IP、花式藏FLAG、花式分析数据包 </p>
+<p>例题：HCTF2014jianshu (400pt) 解题思路： </p>
+<pre><code>* Html编码payload用burp改包提交获得一个ip和审核链接。 xss获取远程IP地址 ：218.75.123.186 后台访问页面： [http://121.41.37.11:2504/get.php?user=V1ew](http://121.41.37.11:2504/get.php?user=V1ew)X-Forwarded-For 伪造登录上去没有flag。 看到提示转换思路，后面为sql注入，得到管理员密码 [http://121.41.37.11:25045/get.php?user=A1rB4s1C](http://121.41.37.11:25045/get.php?user=A1rB4s1C)加上 X-Forwarded-For ：218.75.123.186伪造ip登陆上去。 </code></pre><ul>
+<li><ul>
+<li>XXE 各种XML存在地方(rss/word/流媒体)、各种XXE利用方法（文件读取） 例题：AliCTF-Quals-2014 Web-300 </li>
+</ul>
+</li>
+</ul>
+<p>推荐 <strong>经典例题</strong> ： <a href="http://lab10.wargame.whitehat.vn/web007" target="_blank" rel="noopener">http://lab10.wargame.whitehat.vn/web007</a> </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">WEB、sql....</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2020/08/07/My-Note/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-hello-world" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -318,6 +647,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
             <input type="checkbox" q-on="click:toggleTag(e)" q-attr="checked:showTags">
           </label>
           <ul class="article-tag-list" q-show="showTags">
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">WEB、sql....</a>
+              </li>
             
             <div class="clearfix"></div>
           </ul>
